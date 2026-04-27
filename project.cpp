@@ -94,6 +94,9 @@ void loop() {
     // In Stage 3 we want to play a loud sound and flash an LED
     // until the success button is pressed.
     // This resets our stage back to Stage 0.
+    tone(lightAndBuzzerPin, 880, 200);
+    delay(300);
+
     if(digitalRead(buttonPin) == LOW)
     {
       stage = 0;
