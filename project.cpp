@@ -37,7 +37,7 @@ void setup() {
 }
 
 void loop() {
-  // Set the distance from the ground for later use.
+  // Set the distance & pressure for later use.
   setDistanceFromGround();
   setPressure();
 
@@ -91,7 +91,7 @@ void loop() {
       delay(200);
     }
   } else if(stage == 3) {
-    // In Stage 2 we want to play a loud sound and flash an LED
+    // In Stage 3 we want to play a loud sound and flash an LED
     // until the success button is pressed.
     // This resets our stage back to Stage 0.
     if(digitalRead(buttonPin) == LOW)
