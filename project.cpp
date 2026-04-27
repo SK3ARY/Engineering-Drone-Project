@@ -5,7 +5,7 @@ Adafruit_BMP085 bmp180;
 
 const int forceNextStageButtonPin = 5;
 const int buttonPin = 6;
-const int lightPin = 7;
+const int lightAndBuzzerPin = 7;
 const int distanceSensorTrigPin = 8;
 const int distanceSensorEchoPin = 9;
 
@@ -25,7 +25,7 @@ void setup() {
   }
 
   // Output pins.
-  pinMode(lightPin, OUTPUT);
+  pinMode(lightAndBuzzerPin, OUTPUT);
   pinMode(distanceSensorTrigPin, OUTPUT);
 
   // Input pins.
