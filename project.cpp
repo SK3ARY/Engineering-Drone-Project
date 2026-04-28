@@ -9,11 +9,13 @@ const int lightAndBuzzerPin = 7;
 const int distanceSensorTrigPin = 8;
 const int distanceSensorEchoPin = 9;
 
+
 // Distance sensor variables.
 long duration, inches, cm;
 
 // BMP180 variables.
-float pressurePa, pressureHPa;
+float currentPressurePa, pressureHPa;
+float startPressurePa;
 
 int stage = 0;
 void setup() {
@@ -23,6 +25,9 @@ void setup() {
     Serial.println("BMP180 not found!");
     while (1);
   }
+
+  // Set starting pressure.
+  startPressurePa = bmp180.readPressure();
 
   // Output pins.
   pinMode(lightAndBuzzerPin, OUTPUT);
@@ -48,11 +53,11 @@ void loop() {
   Serial.println(cm);
   Serial.print("Stage: ");
   Serial.println(stage);
-  Serial.print("Pressure(s): ");
-  Serial.print(pressurePa);
-  Serial.print(" Pa || ");
-  Serial.print(pressureHPa);
-  Serial.println(" hPa");
+  Serial.print("Current pressure: ");
+  Serial.print(currentPressurePa);
+  Serial.println(" Pa");
+  Serial.print("Start pressure: ");
+  Serial.println(startPressurePa);
 
   Serial.println(digitalRead(buttonPin));
 
@@ -70,6 +75,12 @@ void loop() {
   {
     // In Stage 0 we want to wait for the button to be pressed.
     // This sends us to the "Set-up Stage" or Stage 1.
+    Serial.println(startPressurePa - currentPressurePa);
+    if((startPressurePa - currentPressurePa) <= -30) {
+      tone(lightAndBuzzerPin, 880, 200);
+      delay(300);
+    }
+
     if(digitalRead(buttonPin) == LOW)
     {
       stage = 1;
@@ -84,7 +95,8 @@ void loop() {
       delay(200);
     }
   } else if(stage == 2) {
-    // In Stage 2 we want to wait until the payload is close to the ground.
+    // In Stage 2 we want to move the servo and 
+    // wait until the payload is close to the ground.
     // This sends us to the "Recovery Stage" or Stage 3.
     if(inches <= 10) {
       stage = 3;
@@ -107,8 +119,9 @@ void loop() {
 
 void setPressure()
 {
-  pressurePa = bmp180.readPressure();
-  pressureHPa = pressurePa / 100.0;
+  currentPressurePa = bmp180.readPressure();
+  pressureHPa = currentPressurePa / 100.0;
+  
 }
 
 void setDistanceFromGround()
