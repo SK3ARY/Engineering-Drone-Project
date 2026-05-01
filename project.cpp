@@ -32,6 +32,12 @@ float differenceThresholdHigh = 30;
 // to change stages to freefall mode (Stage 2).
 float distanceSensorThreshold = 10;
 
+// Stores the sum of the pressure differences
+float pressureDifferenceSum = 0;
+
+// Stores the amount of times the pressure has been checked
+float differenceChecks = 0.0;
+
 int stage = 0;
 void setup() {
   // Setup BMP180
@@ -112,7 +118,7 @@ void loop() {
   } else if(stage == 1) {
     // In Stage 1 we want to wait until the payload is at the right height.
     // This sends us to the "Freefall Stage" or Stage 2.
-    if(pressureDifferencePa >= differenceThresholdHigh)
+    if(pressureDifferencePa >= differenceThresholdHigh || digitalRead(buttonPin) == LOW)
     {
       anchorPressurePa = bmp180.readPressure();
 
@@ -129,9 +135,9 @@ void loop() {
     // This sends us to the "Recovery Stage" or Stage 3.
 
     // Move servo code here. (Do testing to find the right values)
-    cameraServo.write(95);
+    cameraServo.write(90);
     delay(100);
-    cameraServo.write(100);
+    cameraServo.write(110);
     delay(100);
 
     // if(pressureDifferencePa <= differenceThresholdLow) {
@@ -165,7 +171,10 @@ void loop() {
 void setPressure()
 {
   currentPressurePa = bmp180.readPressure();
-  pressureDifferencePa = anchorPressurePa - currentPressurePa;
+  differenceChecks++;
+  // pressureDifferencePa = anchorPressurePa - currentPressurePa;
+  pressureDifferenceSum += anchorPressurePa - currentPressurePa;
+  pressureDifferencePa = pressureDifferenceSum / differenceChecks;
 }
 
 void setDistanceFromGround()
