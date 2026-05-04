@@ -6,7 +6,6 @@ Adafruit_BMP085 bmp180;
 
 Servo cameraServo;
 
-const int forceNextStageButtonPin = 5;
 const int buttonPin = 6;
 const int lightAndBuzzerPin = 7;
 const int distanceSensorTrigPin = 8;
@@ -51,7 +50,6 @@ void setup() {
   // Input pins.
   pinMode(distanceSensorEchoPin, INPUT);
   pinMode(buttonPin, INPUT_PULLUP);
-  pinMode(forceNextStageButtonPin, INPUT_PULLUP);
 
   Serial.begin(115200);
 }
@@ -83,15 +81,6 @@ void loop() {
   Serial.print("Pressure_Difference:");
   Serial.println(pressureDifferencePa);
 
-  // If the "Force Next Stage" button is pressed
-  // we want to advance to the next stage
-  // regardless of if "Next Stage Criteria"
-  // has been met.
-  if(digitalRead(forceNextStageButtonPin) == LOW)
-  {
-    stage = stage == 3 ? 0 : (stage + 1);
-  }
-
   // Stage logic.
   if(stage == 0)
   {
@@ -112,7 +101,7 @@ void loop() {
   } else if(stage == 1) {
     // In Stage 1 we want to wait until the payload is at the right height.
     // This sends us to the "Freefall Stage" or Stage 2.
-    if(pressureDifferencePa >= differenceThresholdHigh)
+    if(pressureDifferencePa >= differenceThresholdHigh || digitalRead(buttonPin) == LOW)
     {
       anchorPressurePa = bmp180.readPressure();
 
@@ -129,13 +118,13 @@ void loop() {
     // This sends us to the "Recovery Stage" or Stage 3.
 
     // Move servo code here. (Do testing to find the right values)
-    cameraServo.write(95);
+    cameraServo.write(90);
     delay(100);
     cameraServo.write(100);
     delay(100);
 
     // if(pressureDifferencePa <= differenceThresholdLow) {
-    if(inches <= distanceSensorThreshold) {
+    if(inches <= distanceSensorThreshold || digitalRead(buttonPin) == LOW) {
       // Play tone for confirmation
       tone(lightAndBuzzerPin, 440, 200);
       delay(300);
