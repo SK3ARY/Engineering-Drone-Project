@@ -2,6 +2,22 @@
 #include <Adafruit_BMP085.h>
 #include <Servo.h>
 
+// Note definitions for jingle
+#define N_R            0
+#define N_G4           392
+#define N_A4           440
+#define N_AS4          466
+#define N_B4           494
+#define N_C5           523
+#define N_D5           587
+#define N_E5           659
+#define N_F5           698
+#define N_G5           784
+#define N_A5           880
+#define N_C6           1047
+#define N_D6           1175
+#define N_F6           1397
+
 Adafruit_BMP085 bmp180;
 
 Servo cameraServo;
@@ -30,6 +46,32 @@ float differenceThresholdHigh = 30;
 // Determines how close (in inches) the distance sensor must be
 // to change stages to freefall mode (Stage 2).
 float distanceSensorThreshold = 10;
+
+// Notes for jingle
+int melody_1[] = {
+  N_R, N_A4, N_AS4, N_C5, N_D5, N_E5, N_F5, N_G5,
+  N_A5, N_A5, N_A5, N_A5, N_F5, N_R, N_A5, N_A5,
+  N_A5, N_A5, N_G5, N_F5, N_A4, N_AS4, N_C5, N_D5,
+  N_C5, N_R, N_F6, N_R, N_D6, N_R, N_C6, N_R,
+  N_G4, N_A4, N_B4, N_C5, N_D5, N_E5, N_F5, N_G5,
+  N_A5, N_A5, N_A5, N_A5, N_F5, N_R, N_A5, N_A5,
+  N_A5, N_A5, N_G5, N_F5, N_A4, N_AS4, N_C5, N_D5,
+  N_C5, N_R, N_F6, N_R, N_D6, N_R, N_C6, N_R,
+  N_G4, N_A4, N_B4, N_C5, N_D5, N_E5, N_F5, N_G5
+};
+
+// Note durations in milliseconds:
+int noteDurations_1[] = {
+  79, 79, 79, 79, 79, 79, 79, 79,
+  313, 313, 313, 625, 625, 626, 469, 313,
+  157, 313, 313, 313, 625, 625, 625, 313,
+  625, 314, 156, 314, 156, 314, 156, 470,
+  79, 79, 79, 79, 79, 79, 79, 79,
+  313, 313, 313, 625, 625, 626, 469, 313,
+  157, 313, 313, 313, 625, 625, 625, 313,
+  625, 314, 156, 314, 156, 314, 156, 470,
+  79, 79, 79, 79, 79, 79, 79, 78
+};
 
 int stage = 0;
 void setup() {
@@ -136,7 +178,7 @@ void loop() {
     // In Stage 3 we want to play a loud sound and flash an LED
     // until the success button is pressed.
     // This resets our stage back to Stage 0.
-    tone(lightAndBuzzerPin, 880, 200);
+    playJingle();
     delay(300);
 
     if(digitalRead(buttonPin) == LOW)
@@ -182,4 +224,20 @@ long microsecondsToInches(long microseconds)
 long microsecondsToCentimeters(long microseconds)
 {
   return microseconds / 29 / 2;
+}
+
+void playJingle()
+{
+  int thisNote = 0;
+  while(thisNote < 72)
+  {
+    if(digitalRead(buttonPin) == LOW) return;
+
+    int noteDuration = noteDurations_1[thisNote];
+    tone(8, melody_1[thisNote], noteDuration * 0.8);
+    int pauseBetweenNotes = noteDuration * 0.9;
+    delay(pauseBetweenNotes);
+    noTone(8);
+    thisNote = thisNote == 71 ? 8 : thisNote + 1;
+  }
 }
